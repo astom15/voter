@@ -19,7 +19,7 @@ class Votebot:
         self.voteNumber = 1
         self.driver = webdriver.Chrome(cfg.info['cdPath'], options=chromeOptions)
 
-    async def sign_in(self, u, uB, p, pB, timeout=10):
+    async def sign_in(self, u, uB, p, pB, timeout=15):
         try: 
             user = WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable((By.XPATH, uB)))
             user.click()
@@ -27,7 +27,6 @@ class Votebot:
         except TimeoutException: 
             self.driver.close()
         await self.password(p, pB)
-        
     
     async def password(self, p, pB):
         pw = self.driver.find_element_by_xpath(pB)
