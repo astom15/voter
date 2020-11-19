@@ -7,6 +7,7 @@ import config as cfg
 import time
 import random as r
 from selenium.common.exceptions import TimeoutException
+import asyncio
 
 class Votebot:
     def __init__(self):
@@ -14,8 +15,27 @@ class Votebot:
         chromeOptions = webdriver.ChromeOptions()
         prefs = {'profile.managed_default_content_settings.images':2}
         chromeOptions.add_experimental_option("prefs", prefs)
-
+        self.signedIn = False
+        self.voteNumber = 1
         self.driver = webdriver.Chrome(cfg.info['cdPath'], options=chromeOptions)
+
+    async def sign_in(self, u, uB, p, pB, timeout=10):
+        try: 
+            user = WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable((By.XPATH, uB)))
+            user.click()
+            user.send_keys(u)
+        except TimeoutException: 
+            self.driver.close()
+        await self.password(p, pB)
+        
+    
+    async def password(self, p, pB):
+        pw = self.driver.find_element_by_xpath(pB)
+        pw.click()
+        pw.send_keys(p)
+        element = self.driver.find_element_by_xpath(cfg.info['signInConfirm'])
+        ActionChains(self.driver).move_to_element(element).click().perform()
+        self.signedIn = True
 
     def get_page(self):
         # open the page
@@ -25,38 +45,35 @@ class Votebot:
         # wait for elements to load before clicking
         return WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable((By.XPATH, button)))
 
-    # def vote(self, player, v):
-    #     # we need to hover over the player button for the vote to become clickable
-    #     button = self.driver.find_element_by_xpath(v)
-    #     hover = ActionChains(self.driver). \
-    #     move_to_element(player).move_to_element(button)
-    #     hover.click().perform()
-
     def submit(self, s):
         # submit button
         self.driver.find_element_by_xpath(s).click()
-
-    def vote_again(self, link_text):
-        self.driver.find_element_by_link_text(link_text).click()
 
 
 def main():
         v = Votebot()
         v.get_page()
+        if not v.signedIn: 
+            loop = asyncio.get_event_loop()
+            v.wait(cfg.info['signIn']).click()
+            userSignIn = loop.create_task(v.sign_in(cfg.info['user'], cfg.info['userInputBox'], cfg.info['pw'], cfg.info['pwInputBox']))
+            loop.run_until_complete(userSignIn)
         while True:
-            v.wait(cfg.info['wrButton']).click()
+            v.wait(cfg.info['defense']).click()
+            v.wait(cfg.info['cbButton']).click()
             v.wait(cfg.info['player']).click()
-            # v.vote(player, cfg.info['vote'])
-            v.submit(cfg.info['submit'])
+            v.submit(cfg.info['vote'])
             try:
-                v.wait(cfg.info['pop_up']).click()
+                v.wait(cfg.info['submit']).click()
             except TimeoutException:
-                v.vote_again(cfg.info['refresh'])
+                v.submit(cfg.info['refresh'])
                 time.sleep(r.uniform(1,3))
-                print('Vote Submitted!')
+                print('Vote {} Submitted!'.format(v.voteNumber))
+                v.voteNumber += 1
                 continue
-            v.vote_again(cfg.info['refresh'])
-            print('Vote Submitted!')
+            v.wait(cfg.info['refresh']).click()
+            print('Vote {} Submitted!'.format(v.voteNumber))
+            v.voteNumber += 1
             time.sleep(r.uniform(1,3))
 
 if __name__ == '__main__':
