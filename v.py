@@ -40,7 +40,7 @@ class Votebot:
         # open the page
         return self.driver.get(cfg.info['webPage'])
 
-    def wait(self, button, timeout=10):
+    def wait(self, button, timeout=15):
         # wait for elements to load before clicking
         return WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable((By.XPATH, button)))
 
@@ -58,18 +58,14 @@ def main():
             userSignIn = loop.create_task(v.sign_in(cfg.info['user'], cfg.info['userInputBox'], cfg.info['pw'], cfg.info['pwInputBox']))
             loop.run_until_complete(userSignIn)
         while True:
-            v.wait(cfg.info['defense']).click()
-            v.wait(cfg.info['cbButton']).click()
-            v.wait(cfg.info['player']).click()
-            v.submit(cfg.info['vote'])
-            try:
+            try: 
+                v.wait(cfg.info['defense']).click()
+                v.wait(cfg.info['cbButton']).click()
+                v.wait(cfg.info['player']).click()
+                v.submit(cfg.info['vote'])
                 v.wait(cfg.info['submit']).click()
             except TimeoutException:
-                v.submit(cfg.info['refresh'])
-                time.sleep(r.uniform(1,3))
-                print('Vote {} Submitted!'.format(v.voteNumber))
-                v.voteNumber += 1
-                continue
+                v.driver.quit()
             v.wait(cfg.info['refresh']).click()
             print('Vote {} Submitted!'.format(v.voteNumber))
             v.voteNumber += 1

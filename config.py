@@ -8,7 +8,7 @@ info = {'cdPath': '/usr/local/bin/chromedriver',
         'webPage': 'http://www.nfl.com/pro-bowl/ballot',
         'defense': '/html/body/div[4]/main/section[1]/div/div/div/div[2]/div[2]/div[1]/div/div/div[2]/div/div/div/div[2]/div',
         'cbButton': '/html/body/div[4]/main/section[1]/div/div/div/div[2]/div[2]/div[2]/div/div/div[2]/div/div/div/div[5]/div',
-        'player': '/html/body/div[4]/main/section[1]/div/div/div/div[2]/div[4]/div/div[49]',
+        'player': "//*[text()='J. Verrett']",
         'vote': '/html/body/div[4]/main/section[1]/div/div/div/div[2]/div[5]/div/div[2]/div',
         'submit': '/html/body/div[4]/main/section[1]/div/div/div/div[2]/div/div[3]/div/div[2]/div',
         'refresh': '/html/body/div[4]/main/section[1]/div/div/div[2]/div/div/div/div[2]/a[1]'
